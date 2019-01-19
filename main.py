@@ -33,6 +33,7 @@ def build_data_frame(path , labeling):
     df = pd.DataFrame(rows,index=index)
     return df
 
+
 HAM = 'ham'
 SPAM = 'spam'
 

@@ -4,3 +4,5 @@ class LogisticRegression :
     
     def sigmoid(t):
         return (1/(1+(np.exp(-t))))
+    
+    def cost():
