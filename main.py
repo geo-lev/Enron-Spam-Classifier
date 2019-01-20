@@ -1,6 +1,8 @@
 import os 
 import numpy as np 
 import pandas as pd 
+import scipy.sparse as sp
+import LogisticRegression
 
 NEWLINE = '\n'
 SKIP_FILES = {'cmds'}
@@ -28,14 +30,17 @@ def build_data_frame(path , labeling):
     rows= []
     index = []
     for file_name , text in read_files(path):
-        rows.append({'text' : text , 'label' : labeling})
+        rows.append({'text' : text , 'class' : labeling})
         index.append(file_name)
     df = pd.DataFrame(rows,index=index)
     return df
 
+def add_ones(X):
+    X['bias'] = 1
+    return X
 
-HAM = 'ham'
-SPAM = 'spam'
+HAM = 0
+SPAM = 1
 
 SOURCES = [('beck-s', HAM),
            ('farmer-d' , HAM),
@@ -51,3 +56,15 @@ df = pd.DataFrame({'text': [] ,'class': []})
 for path, labeling in SOURCES:
     df = df.append(build_data_frame(path , labeling))
 df = df.reindex(np.random.permutation(df.index))
+
+from sklearn.feature_extraction.text import CountVectorizer
+word_count= CountVectorizer(min_df=0.5)
+X = word_count.fit_transform(df['text'])
+X = sp.csc_matrix.todense(X)
+y=df['class']
+y = y[:,np.newaxis]
+
+clf = LogisticRegression.LogisticRegression()
+weight , log_likelihood = clf.fit(X,y)
+y_pred = clf.predict(X , weight)
+
