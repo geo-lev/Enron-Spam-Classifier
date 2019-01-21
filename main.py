@@ -1,6 +1,7 @@
 import os 
 import numpy as np 
 import pandas as pd 
+import matplotlib.pyplot as plt
 import scipy.sparse as sp
 import LogisticRegression
 
@@ -35,10 +36,6 @@ def build_data_frame(path , labeling):
     df = pd.DataFrame(rows,index=index)
     return df
 
-def add_ones(X):
-    X['bias'] = 1
-    return X
-
 HAM = 0
 SPAM = 1
 
@@ -58,13 +55,24 @@ for path, labeling in SOURCES:
 df = df.reindex(np.random.permutation(df.index))
 
 from sklearn.feature_extraction.text import CountVectorizer
-word_count= CountVectorizer(min_df=0.5)
+word_count= CountVectorizer(min_df=0.1)
 X = word_count.fit_transform(df['text'])
 X = sp.csc_matrix.todense(X)
 y=df['class']
 y = y[:,np.newaxis]
 
 clf = LogisticRegression.LogisticRegression()
-weight , log_likelihood = clf.fit(X,y)
-y_pred = clf.predict(X , weight)
-
+from sklearn.model_selection import StratifiedKFold
+skf = StratifiedKFold(n_splits=5)
+i=0
+for train_index,test_index in skf.split(X,y):
+    i += 1
+    print('Training ',i,'fold of ',skf.n_splits) 
+    X_train,X_test = X[train_index],X[test_index]
+    y_train , y_test = y[train_index] , y[test_index]
+    weight , log_likelihood = clf.fit(X_train,y_train)
+    y_pred = clf.predict(X_test , weight)
+    print('Accuracy is ' , (y_test==y_pred).mean())
+    from sklearn.metrics import f1_score
+    print('f1_micro is ', f1_score(y_test,y_pred))
+    plt.plot(log_likelihood)
