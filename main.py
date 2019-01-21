@@ -2,6 +2,7 @@ import os
 import numpy as np 
 import pandas as pd 
 import matplotlib.pyplot as plt
+import time
 import scipy.sparse as sp
 import LogisticRegression
 
@@ -60,8 +61,23 @@ X = word_count.fit_transform(df['text'])
 X = sp.csc_matrix.todense(X)
 y=df['class']
 y = y[:,np.newaxis]
+print('Shape of training matrix' , X.shape)
 
 clf = LogisticRegression.LogisticRegression()
+
+#Normal training and measurement
+#print('Starting time counter')
+#start_time= time.time()
+#print('Entering fit function')
+#weight , log_likelihood = clf.fit(X,y)
+#elapsed_time = time.time() - start_time
+#print('Time elapsed : ', elapsed_time )
+#y_pred = clf.predict(X , weight)
+#print('Accuracy is ' , (y==y_pred).mean())
+
+
+
+#StratifiedKFolds training and measurements
 from sklearn.model_selection import StratifiedKFold
 skf = StratifiedKFold(n_splits=5)
 i=0
@@ -73,6 +89,8 @@ for train_index,test_index in skf.split(X,y):
     weight , log_likelihood = clf.fit(X_train,y_train)
     y_pred = clf.predict(X_test , weight)
     print('Accuracy is ' , (y_test==y_pred).mean())
-    from sklearn.metrics import f1_score
-    print('f1_micro is ', f1_score(y_test,y_pred))
+    from sklearn.metrics import f1_score,precision_score,recall_score
+    print('f1_micro is :', f1_score(y_test,y_pred) )
+    print('Precision is : ', precision_score(y_test, y_pred))
+    print('Recall is : ',recall_score(y_test , y_pred) ,'\n')
     plt.plot(log_likelihood)

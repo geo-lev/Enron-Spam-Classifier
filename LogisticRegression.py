@@ -2,7 +2,7 @@ import numpy as np
 
 class LogisticRegression :
     
-    def __init__(self , learning_rate = 0.001, epochs=140 , reg_term=0.0001 , bias = True , batch_size=64):
+    def __init__(self , learning_rate = 0.001, epochs=60 , reg_term=0.0001 , bias = True , batch_size=64):
         self.learning_rate = learning_rate
         self.epochs = epochs
         self.reg_term = reg_term
@@ -39,7 +39,6 @@ class LogisticRegression :
         return result.T
 
     def fit(self ,X ,y):
-        print('Starting fit function')
         if self.bias :
             X = self.add_bias(X)
         weight = np.random.rand(1,X.shape[1])
@@ -56,7 +55,7 @@ class LogisticRegression :
             loss = self.log_likelihood(X_batch , y_batch , weight)
             cost_history[i] = loss
         return weight , cost_history
-    
+
     
     def predict(self, X ,weight , bias=True) :
         if bias:
